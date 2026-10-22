@@ -6,10 +6,10 @@ Predict residential property prices in Bengaluru using **XGBoost, Python, Scikit
 
 <p align="center">
   <a href="https://house-price-prediction-seemz.streamlit.app/">
-    <img src="https://img.shields.io/badge/🚀_Live_Demo-Try_the_App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo">
+    <img src="https://img.shields.io/badge/🚀_LAUNCH_LIVE_APP-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Launch Live App">
   </a>
   <a href="https://github.com/Seema2908/Bangalore-House-Price-Prediction">
-    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+    <img src="https://img.shields.io/badge/💻_VIEW_SOURCE_CODE-7C3AED?style=for-the-badge&logo=github&logoColor=white" alt="View Source Code">
   </a>
 </p>
 
@@ -28,14 +28,21 @@ This project uses historical Bengaluru housing data to build a regression model 
 | **Web Framework** | Streamlit |
 | **Target Variable** | `price_in_lakhs` |
 
-## 📊 Model Performance
-
-The XGBoost model was evaluated on a held-out test set containing **1,231 records**.
+📊 Model Performance
 
 <p align="center">
-  <img src="https://img.shields.io/badge/R²_Score-91.96%25-2E8B57?style=for-the-badge" alt="R2 Score">
-  <img src="https://img.shields.io/badge/MAE-₹11.13_Lakhs-2563EB?style=for-the-badge" alt="MAE">
-  <img src="https://img.shields.io/badge/RMSE-₹17.54_Lakhs-7C3AED?style=for-the-badge" alt="RMSE">
+  <b>Evaluated on 1,231 unseen test records</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/R²_SCORE-91.96%25-00C853?style=for-the-badge&labelColor=171717&logoColor=white" alt="R2 Score 91.96%">
+  <img src="https://img.shields.io/badge/MAE-₹11.13_LAKHS-00B8D9?style=for-the-badge&labelColor=171717" alt="MAE 11.13 lakhs">
+  <img src="https://img.shields.io/badge/RMSE-₹17.54_LAKHS-B15CFF?style=for-the-badge&labelColor=171717" alt="RMSE 17.54 lakhs">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/🏆_BEST_MODEL-XGBoost-FF9800?style=for-the-badge&labelColor=171717" alt="Best Model XGBoost">
+  <img src="https://img.shields.io/badge/📈_TASK-Regression-2196F3?style=for-the-badge&labelColor=171717" alt="Regression">
 </p>
 
 | Model | MAE (lakhs) | RMSE (lakhs) | R² Score |
