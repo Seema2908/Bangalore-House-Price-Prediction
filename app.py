@@ -1,13 +1,13 @@
-
 from pathlib import Path
-
+from textwrap import dedent
+import html
 import joblib
 import pandas as pd
 import streamlit as st
 
-# --------------------------------------------------
-# PAGE CONFIGURATION
-# --------------------------------------------------
+# ------------------------------------------------------------
+# PAGE CONFIG
+# ------------------------------------------------------------
 st.set_page_config(
     page_title="Bengaluru Homes | Price Predictor",
     page_icon="🏙️",
@@ -19,719 +19,264 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "models" / "house_price_model.pkl"
 DATA_PATH = BASE_DIR / "data" / "cleaned_bengaluru_house_data.csv"
 
-
-# --------------------------------------------------
-# LOAD MODEL AND DATA
-# --------------------------------------------------
-@st.cache_resource
-def load_model():
-    return joblib.load(MODEL_PATH)
-
-
-@st.cache_data
-def load_locations():
-    data = pd.read_csv(DATA_PATH)
-
-    locations = sorted(
-        data["location"].dropna().astype(str).unique().tolist()
-    )
-    area_types = sorted(
-        data["area_type"].dropna().astype(str).unique().tolist()
-    )
-
-    return locations, area_types
-
-
-# --------------------------------------------------
-# CUSTOM CSS: DARK THEME + ANIMATIONS
-# --------------------------------------------------
-st.markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-
-    :root {
-        color-scheme: dark;
-        --background: #080d1b;
-        --surface: #111a2e;
-        --text: #f1f5ff;
-        --muted: #a7b4ce;
-        --blue: #65a7ff;
-        --purple: #a78bfa;
-    }
-
-    html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-    }
-
-    /* Main background */
-    .stApp {
-        background:
-            radial-gradient(ellipse at 10% 0%, rgba(58, 104, 210, 0.22), transparent 35%),
-            radial-gradient(ellipse at 90% 25%, rgba(139, 92, 246, 0.17), transparent 32%),
-            linear-gradient(135deg, #080d1b 0%, #0b1224 50%, #0c1020 100%);
-        color: var(--text);
-    }
-
-    [data-testid="stHeader"] {
-        background: rgba(8, 13, 27, 0.75);
-    }
-
-    [data-testid="stToolbar"] {
-        right: 1rem;
-    }
-
-    .block-container {
-        max-width: 1180px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-    }
-
-    /* Global text visibility */
-    h1, h2, h3, h4, p, label, li, span, div {
-        font-family: 'DM Sans', sans-serif;
-    }
-
-    .stMarkdown, .stMarkdown p {
-        color: #e8eeff;
-    }
-
-    [data-testid="stCaptionContainer"] {
-        color: #a7b4ce !important;
-    }
-
-    /* Animated top label */
-    .eyebrow {
-        display: inline-block;
-        padding: 8px 15px;
-        margin-bottom: 20px;
-        color: #b9d7ff;
-        background: rgba(72, 133, 255, 0.12);
-        border: 1px solid rgba(101, 167, 255, 0.35);
-        border-radius: 30px;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 1.6px;
-        animation: fadeUp 0.8s ease-out both;
-    }
-
-    /* Hero section */
-    .hero {
-        position: relative;
-        overflow: hidden;
-        padding: 42px 38px;
-        margin: 10px 0 28px;
-        border: 1px solid rgba(157, 180, 255, 0.18);
-        border-radius: 28px;
-        background:
-            linear-gradient(115deg, rgba(28, 48, 91, 0.96), rgba(27, 24, 62, 0.93));
-        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
-        animation: fadeUp 0.8s ease-out both;
-    }
-
-    .hero::before {
-        content: "";
-        position: absolute;
-        width: 300px;
-        height: 300px;
-        top: -150px;
-        right: -40px;
-        border-radius: 50%;
-        background: rgba(86, 150, 255, 0.24);
-        filter: blur(65px);
-        animation: floatGlow 7s ease-in-out infinite alternate;
-        pointer-events: none;
-    }
-
-    .hero::after {
-        content: "";
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        right: 28%;
-        bottom: -140px;
-        border-radius: 50%;
-        background: rgba(167, 139, 250, 0.22);
-        filter: blur(50px);
-        animation: floatGlow 8s ease-in-out infinite alternate-reverse;
-        pointer-events: none;
-    }
-
-    .hero h1 {
-        position: relative;
-        z-index: 1;
-        margin: 0;
-        font-family: 'Manrope', sans-serif;
-        font-size: clamp(32px, 5vw, 52px);
-        font-weight: 800;
-        line-height: 1.16;
-        letter-spacing: -1.8px;
-        color: #ffffff !important;
-    }
-
-    .hero h1 .gradient {
-        background: linear-gradient(90deg, #83c5ff, #c4b5fd);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent !important;
-    }
-
-    .hero p {
-        position: relative;
-        z-index: 1;
-        max-width: 650px;
-        margin-top: 16px;
-        color: #d1ddf5 !important;
-        font-size: 16px;
-        line-height: 1.8;
-    }
-
-    .hero-tag {
-        position: relative;
-        z-index: 1;
-        display: inline-flex;
-        margin-top: 14px;
-        padding: 9px 13px;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.07);
-        color: #e3eaff;
-        font-size: 12px;
-        border: 1px solid rgba(255,255,255,0.10);
-    }
-
-    /* Feature cards */
-    .feature-card {
-        height: 100%;
-        min-height: 110px;
-        padding: 20px;
-        border-radius: 19px;
-        background: linear-gradient(
-            145deg,
-            rgba(21, 32, 56, 0.96),
-            rgba(15, 23, 42, 0.92)
-        );
-        border: 1px solid rgba(143, 169, 220, 0.16);
-        transition: transform 0.28s ease, border-color 0.28s ease,
-                    box-shadow 0.28s ease;
-        animation: fadeUp 0.8s ease-out both;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(101, 167, 255, 0.55);
-        box-shadow: 0 15px 35px rgba(34, 75, 150, 0.15);
-    }
-
-    .feature-icon {
-        font-size: 23px;
-        margin-bottom: 12px;
-    }
-
-    .feature-title {
-        color: #ffffff !important;
-        font-size: 15px;
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-
-    .feature-description {
-        color: #aebbd5 !important;
-        font-size: 12px;
-        line-height: 1.6;
-    }
-
-    /* Section headings */
-    .section-heading {
-        color: #f5f7ff !important;
-        font-family: 'Manrope', sans-serif;
-        font-size: 25px;
-        font-weight: 800;
-        letter-spacing: -0.6px;
-        margin: 28px 0 6px;
-    }
-
-    .section-subtitle {
-        color: #aab8d3 !important;
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
-
-    /* Form container */
-    [data-testid="stForm"] {
-        padding: 28px;
-        border: 1px solid rgba(143, 169, 220, 0.20);
-        border-radius: 24px;
-        background: rgba(15, 23, 42, 0.86);
-        box-shadow: 0 18px 55px rgba(0, 0, 0, 0.16);
-        animation: fadeUp 0.9s ease-out both;
-    }
-
-    /* Labels */
-    [data-testid="stWidgetLabel"] p,
-    [data-testid="stWidgetLabel"] label,
-    .stSelectbox label,
-    .stNumberInput label {
-        color: #eaf0ff !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-    }
-
-    /* Input controls */
-    [data-baseweb="select"] > div,
-    [data-testid="stNumberInput"] input {
-        color: #f4f7ff !important;
-        background-color: #101a30 !important;
-        border: 1px solid #354462 !important;
-        border-radius: 12px !important;
-        min-height: 46px;
-    }
-
-    [data-baseweb="select"] > div:hover,
-    [data-testid="stNumberInput"] input:hover {
-        border-color: #76adff !important;
-    }
-
-    [data-baseweb="select"] input {
-        color: #ffffff !important;
-    }
-
-    [data-baseweb="select"] svg {
-        fill: #c5d4f1 !important;
-    }
-
-    [data-testid="stNumberInput"] button {
-        color: #eaf0ff !important;
-        background: #1b2944 !important;
-        border-color: #354462 !important;
-    }
-
-    /* Dropdown menu */
-    [data-baseweb="popover"],
-    [data-baseweb="menu"],
-    [role="listbox"] {
-        background: #111b30 !important;
-        border: 1px solid #344767 !important;
-    }
-
-    [role="option"] {
-        color: #f1f5ff !important;
-        background: #111b30 !important;
-    }
-
-    [role="option"]:hover,
-    [aria-selected="true"] {
-        background: #263b60 !important;
-        color: #ffffff !important;
-    }
-
-    /* Primary button */
-    .stFormSubmitButton button,
-    .stButton button {
-        width: 100%;
-        min-height: 49px;
-        border: 1px solid rgba(170, 204, 255, 0.35) !important;
-        border-radius: 13px !important;
-        color: #ffffff !important;
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        background: linear-gradient(100deg, #3478f6, #7658e8) !important;
-        box-shadow: 0 8px 24px rgba(72, 103, 240, 0.24);
-        transition: transform 0.22s ease, box-shadow 0.22s ease;
-    }
-
-    .stFormSubmitButton button:hover,
-    .stButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px rgba(86, 113, 255, 0.38);
-        border-color: #b3cfff !important;
-    }
-
-    .stFormSubmitButton button:active,
-    .stButton button:active {
-        transform: scale(0.98);
-    }
-
-    /* Prediction result */
-    .result-card {
-        position: relative;
-        overflow: hidden;
-        margin-top: 28px;
-        padding: 32px;
-        border: 1px solid rgba(111, 190, 255, 0.40);
-        border-radius: 24px;
-        background:
-            radial-gradient(circle at 100% 0%, rgba(91, 125, 255, 0.22), transparent 35%),
-            linear-gradient(135deg, #142847, #171a3a);
-        box-shadow: 0 20px 60px rgba(20, 65, 140, 0.22);
-        animation: resultReveal 0.7s cubic-bezier(.2,.8,.2,1) both;
-    }
-
-    .result-label {
-        color: #b7c9e8 !important;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 1.3px;
-        text-transform: uppercase;
-    }
-
-    .result-price {
-        margin: 13px 0 7px;
-        color: #ffffff !important;
-        font-family: 'Manrope', sans-serif;
-        font-size: clamp(34px, 5vw, 51px);
-        font-weight: 800;
-        letter-spacing: -1.6px;
-        line-height: 1.2;
-        overflow-wrap: anywhere;
-    }
-
-    .result-crore {
-        color: #9dc8ff !important;
-        font-size: 17px;
-        font-weight: 600;
-    }
-
-    .result-note {
-        margin-top: 18px;
-        color: #bdcbe2 !important;
-        font-size: 13px;
-        line-height: 1.7;
-    }
-
-    /* Metric cards */
-    [data-testid="stMetric"] {
-        padding: 17px;
-        border: 1px solid rgba(143, 169, 220, 0.17);
-        border-radius: 16px;
-        background: rgba(14, 23, 41, 0.82);
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #b6c5df !important;
-    }
-
-    [data-testid="stMetricValue"] {
-        color: #ffffff !important;
-    }
-
-    /* Notices */
-    [data-testid="stAlert"] {
-        border-radius: 13px;
-    }
-
-    /* Footer */
-    .footer {
-        margin-top: 45px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(143, 169, 220, 0.15);
-        text-align: center;
-        color: #8797b6 !important;
-        font-size: 12px;
-        line-height: 1.8;
-    }
-
-    @keyframes fadeUp {
-        from {
-            opacity: 0;
-            transform: translateY(18px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes floatGlow {
-        from { transform: translate(0, 0) scale(1); }
-        to { transform: translate(-25px, 22px) scale(1.18); }
-    }
-
-    @keyframes resultReveal {
-        from {
-            opacity: 0;
-            transform: translateY(22px) scale(0.985);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    /* Respect reduced-motion accessibility preferences */
-    @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
-            animation: none !important;
-            transition: none !important;
-        }
-    }
-
-    @media (max-width: 700px) {
-        .block-container {
-            padding: 1rem 1rem 3rem;
-        }
-
-        .hero {
-            padding: 28px 22px;
-            border-radius: 21px;
-        }
-
-        [data-testid="stForm"] {
-            padding: 18px;
-        }
-
-        .result-card {
-            padding: 24px;
-        }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# --------------------------------------------------
-# HERO SECTION
-# --------------------------------------------------
-st.markdown(
-    """
-    <div class="hero">
-        <div class="eyebrow">✦ SMART REAL ESTATE ESTIMATOR</div>
-        <h1>Find your next home<br>in <span class="gradient">Bengaluru.</span></h1>
-        <p>
-            Discover an estimated property price using machine learning.
-            Choose your location, configure your property details, and
-            get a personalized price estimate in seconds.
-        </p>
-        <div class="hero-tag">🤖 Machine Learning &nbsp; • &nbsp;
-        📍 Bengaluru, India &nbsp; • &nbsp; ⚡ Instant Estimate</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# --------------------------------------------------
-# FEATURE CARDS
-# --------------------------------------------------
-feature_columns = st.columns(3)
-
+# ------------------------------------------------------------
+# HELPERS
+# ------------------------------------------------------------
+def html_block(markup: str) -> None:
+    """Render HTML safely from a dedented string (avoids Markdown code blocks)."""
+    st.markdown(dedent(markup).strip(), unsafe_allow_html=True)
+
+
+@st.cache_resource(show_spinner="Loading the trained prediction model…")
+def load_model(path_string: str):
+    return joblib.load(path_string)
+
+
+@st.cache_data(show_spinner="Loading Bengaluru property locations…")
+def load_data(path_string: str):
+    frame = pd.read_csv(path_string)
+    required = {"area_type", "location", "BHK", "total_sqft", "bath", "balcony", "price_in_lakhs"}
+    missing = required.difference(frame.columns)
+    if missing:
+        raise ValueError(f"The cleaned dataset is missing columns: {', '.join(sorted(missing))}")
+    frame = frame.copy()
+    frame["location"] = frame["location"].astype(str).str.strip()
+    frame = frame[frame["location"].ne("")]
+    locations = sorted(frame["location"].dropna().unique().tolist())
+    area_types = sorted(frame["area_type"].dropna().astype(str).unique().tolist())
+    return frame, locations, area_types
+
+
+def identify_model(model) -> str:
+    """Try to describe the saved estimator without guessing its model family."""
+    candidates = [model]
+    if hasattr(model, "named_steps"):
+        candidates.extend(list(model.named_steps.values()))
+    elif hasattr(model, "steps"):
+        candidates.extend(step for _, step in model.steps)
+    names = [type(item).__name__ for item in candidates]
+    for name in reversed(names):
+        lower = name.lower()
+        if "xgb" in lower:
+            return "XGBoost"
+        if "randomforest" in lower:
+            return "Random Forest"
+        if "gradientboost" in lower:
+            return "Gradient Boosting"
+        if "decisiontree" in lower:
+            return "Decision Tree"
+        if "linearregression" in lower:
+            return "Linear Regression"
+        if "ridge" in lower:
+            return "Ridge Regression"
+        if "lasso" in lower:
+            return "Lasso Regression"
+        if "catboost" in lower:
+            return "CatBoost"
+        if "lgbm" in lower or "lightgbm" in lower:
+            return "LightGBM"
+    return "Trained Machine Learning Model"
+
+
+# ------------------------------------------------------------
+# STYLING — CSS only; layout and form remain native Streamlit
+# ------------------------------------------------------------
+st.markdown(dedent("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+:root { color-scheme: dark; --bg:#080d1b; --panel:#111a2e; --line:rgba(148,171,220,.18); --text:#f1f5ff; --muted:#a7b4ce; --blue:#65a7ff; --purple:#a78bfa; }
+html, body, [class*="css"] { font-family:'DM Sans',sans-serif; }
+.stApp { color:var(--text); background:radial-gradient(ellipse at 8% 0%,rgba(58,104,210,.22),transparent 35%),radial-gradient(ellipse at 92% 20%,rgba(139,92,246,.17),transparent 32%),linear-gradient(135deg,#080d1b 0%,#0b1224 55%,#0c1020 100%); }
+[data-testid="stHeader"] {
+    background:transparent !important;
+    box-shadow:none !important;
+}
+[data-testid="stToolbar"] { background:transparent !important; }
+section[data-testid="stMain"] > div.block-container {
+    padding-top:0.75rem !important;
+}
+.block-container { max-width:1220px; padding-top:0.75rem; padding-bottom:3.5rem; }
+#MainMenu, footer { visibility:hidden; }
+h1,h2,h3 { font-family:'Manrope',sans-serif !important; color:var(--text) !important; }
+p, label, [data-testid="stCaptionContainer"] { color:var(--muted); }
+.hero { position:relative; overflow:hidden; padding:clamp(28px,5vw,62px); border:1px solid rgba(128,161,255,.28); border-radius:30px; background:linear-gradient(120deg,rgba(33,54,99,.94),rgba(35,31,77,.91)); box-shadow:0 22px 70px rgba(0,0,0,.22); animation:rise .65s ease-out both; }
+.hero:after { content:''; position:absolute; width:320px; height:320px; right:-90px; top:-150px; border-radius:50%; background:rgba(101,167,255,.14); filter:blur(3px); pointer-events:none; }
+.eyebrow { display:inline-flex; gap:8px; align-items:center; padding:8px 14px; border:1px solid rgba(101,167,255,.34); border-radius:999px; background:rgba(101,167,255,.1); color:#c5ddff; font-size:12px; font-weight:700; letter-spacing:1.1px; }
+.hero h1 { max-width:800px; margin:24px 0 14px; font-size:clamp(36px,5.4vw,64px); line-height:1.08; letter-spacing:-2px; }
+.gradient { background:linear-gradient(90deg,#8bc5ff,#c1a8ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero-copy { max-width:690px; font-size:17px; line-height:1.8; color:#c4cde2; }
+.hero-tag { display:inline-block; margin-top:17px; padding:10px 15px; border:1px solid rgba(255,255,255,.12); border-radius:13px; background:rgba(255,255,255,.07); color:#dce6ff; font-size:14px; }
+.feature-card { height:100%; min-height:158px; padding:24px; border:1px solid var(--line); border-radius:23px; background:linear-gradient(145deg,rgba(20,31,53,.96),rgba(14,23,41,.96)); transition:transform .2s ease,border-color .2s ease; }
+.feature-card:hover { transform:translateY(-3px); border-color:rgba(101,167,255,.45); }
+.feature-icon { font-size:25px; margin-bottom:17px; }
+.feature-title { color:#f2f5ff; font-weight:800; font-size:18px; margin-bottom:9px; }
+.feature-description { color:#aebbd3; font-size:14px; line-height:1.7; }
+.section-heading { margin:38px 0 5px; font-family:'Manrope',sans-serif; font-size:30px; font-weight:800; letter-spacing:-.7px; color:#f1f5ff; }
+.section-subtitle { margin-bottom:22px; color:#a7b4ce; font-size:16px; }
+.form-panel { padding:24px 25px 8px; border:1px solid var(--line); border-radius:25px; background:rgba(17,26,46,.76); }
+[data-testid="stForm"] { padding:22px 24px 20px; border:1px solid var(--line); border-radius:24px; background:rgba(17,26,46,.8); }
+[data-testid="stWidgetLabel"] p { color:#e0e7f8 !important; font-weight:650; }
+[data-baseweb="select"] > div, [data-baseweb="input"] > div, [data-baseweb="textarea"] > div { background-color:#151f34 !important; border-color:#2b3b5d !important; border-radius:11px !important; }
+[data-baseweb="select"] *, [data-baseweb="input"] input { color:#f1f5ff !important; }
+.stNumberInput button { color:#dce7ff !important; background:#1a2944 !important; border-color:#2b3b5d !important; }
+.stButton > button, [data-testid="stFormSubmitButton"] button {
+  width:100%; min-height:54px; border:0 !important; border-radius:12px !important;
+  padding:.9rem 1.2rem !important; color:#081225 !important;
+  -webkit-text-fill-color:#081225 !important; font-weight:800 !important;
+  background:linear-gradient(95deg,#83c1ff,#b6a2ff) !important;
+  opacity:1 !important; box-shadow:0 8px 22px rgba(101,167,255,.16);
+  transition:transform .2s ease,filter .2s ease;
+}
+.stButton > button *, [data-testid="stFormSubmitButton"] button * {
+  color:#081225 !important; -webkit-text-fill-color:#081225 !important;
+  opacity:1 !important; font-weight:800 !important;
+}
+.stButton > button:hover, [data-testid="stFormSubmitButton"] button:hover {
+  transform:translateY(-2px); filter:brightness(1.06);
+}
+.stButton > button:focus, [data-testid="stFormSubmitButton"] button:focus {
+  outline:3px solid rgba(131,193,255,.45) !important; outline-offset:3px;
+}
+.result-card { margin-top:24px; padding:30px; border:1px solid rgba(101,167,255,.35); border-radius:24px; background:radial-gradient(ellipse at 100% 0%,rgba(167,139,250,.16),transparent 40%),linear-gradient(135deg,#142443,#151b38); animation:rise .45s ease-out both; }
+.result-label { color:#c4d8ff; font-size:14px; font-weight:700; letter-spacing:.6px; }
+.result-price { margin:10px 0 3px; font-family:'Manrope',sans-serif; color:#fff; font-size:clamp(34px,5vw,52px); font-weight:800; letter-spacing:-1.6px; }
+.result-crore { color:#b9c8e6; font-size:17px; }
+.result-note { margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,.12); color:#aebbd3; line-height:1.8; }
+.footer { margin-top:44px; padding:24px 8px 0; border-top:1px solid var(--line); color:#7787a5; text-align:center; font-size:12px; line-height:1.9; letter-spacing:.25px; }
+div[data-testid="stMetric"] { padding:16px; border:1px solid var(--line); border-radius:16px; background:rgba(17,26,46,.72); }
+@keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:700px) { .block-container{padding:1rem 1rem 2rem;} .hero{border-radius:22px;padding:25px 22px;} .hero h1{letter-spacing:-1px;} [data-testid="stForm"]{padding:16px;} .section-heading{font-size:25px;} }
+</style>
+"""), unsafe_allow_html=True)
+
+# ------------------------------------------------------------
+# HERO
+# ------------------------------------------------------------
+html_block("""
+<div class="hero">
+  <div class="eyebrow">✦ SMART REAL ESTATE ESTIMATOR</div>
+  <h1>Find your next home<br>in <span class="gradient">Bengaluru.</span></h1>
+  <div class="hero-copy">Discover an estimated property price using machine learning. Choose your location, configure your property details, and get a personalized estimate in seconds.</div>
+  <div class="hero-tag">🤖 Machine Learning &nbsp; • &nbsp; 📍 Bengaluru, India &nbsp; • &nbsp; ⚡ Instant Estimate</div>
+</div>
+""")
+
+st.write("")
+feature_cols = st.columns(3, gap="medium")
 features = [
-    (
-        "📍",
-        "Location-aware",
-        "Select from locations available in the cleaned dataset.",
-    ),
-    (
-        "🧠",
-        "ML-powered",
-        "Predictions generated by your trained Linear Regression pipeline.",
-    ),
-    (
-        "⚡",
-        "Instant estimate",
-        "Get a price estimate immediately after submitting the form.",
-    ),
+    ("📍", "Location-aware", "Choose from locations available in the cleaned Bengaluru housing dataset."),
+    ("🧠", "ML-powered", "Your saved, trained model generates an estimate from the property details you provide."),
+    ("⚡", "Instant estimate", "Submit the form to see an estimated price in lakhs and crores."),
 ]
+for col, (icon, title, description) in zip(feature_cols, features):
+    with col:
+        html_block(f"""
+        <div class="feature-card">
+          <div class="feature-icon">{icon}</div>
+          <div class="feature-title">{title}</div>
+          <div class="feature-description">{description}</div>
+        </div>
+        """)
 
-for column, (icon, title, description) in zip(feature_columns, features):
-    with column:
-        st.markdown(
-            f"""
-            <div class="feature-card">
-                <div class="feature-icon">{icon}</div>
-                <div class="feature-title">{title}</div>
-                <div class="feature-description">{description}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-
-# --------------------------------------------------
-# LOAD FILES
-# --------------------------------------------------
-if not MODEL_PATH.exists():
-    st.error(
-        "Model file not found. Please check that "
-        "models/house_price_model.pkl exists."
-    )
-    st.stop()
-
+# ------------------------------------------------------------
+# LOAD FILES WITH FRIENDLY ERROR MESSAGES
+# ------------------------------------------------------------
 if not DATA_PATH.exists():
-    st.error(
-        "Cleaned dataset not found. Please check that "
-        "data/cleaned_bengaluru_house_data.csv exists."
-    )
+    st.error(f"Dataset file not found: {DATA_PATH}")
+    st.info("Place cleaned_bengaluru_house_data.csv inside the project's data folder.")
+    st.stop()
+if not MODEL_PATH.exists():
+    st.error(f"Trained model file not found: {MODEL_PATH}")
+    st.info("Place house_price_model.pkl inside the project's models folder.")
     st.stop()
 
 try:
-    model = load_model()
-    locations, area_types = load_locations()
-except Exception as error:
-    st.error(f"Unable to load the model or dataset: {error}")
+    data, locations, area_types = load_data(str(DATA_PATH))
+    model = load_model(str(MODEL_PATH))
+    model_label = identify_model(model)
+except Exception as exc:
+    st.error("The model or dataset could not be loaded.")
+    st.exception(exc)
     st.stop()
 
-if not locations or not area_types:
-    st.error("No locations or area types were found in the cleaned dataset.")
-    st.stop()
+# ------------------------------------------------------------
+# PROPERTY FORM
+# ------------------------------------------------------------
+html_block("""
+<div class="section-heading">Configure your property</div>
+<div class="section-subtitle">Enter the details below to estimate the property price.</div>
+""")
 
+with st.form("property_prediction_form", clear_on_submit=False):
+    left, right = st.columns(2, gap="large")
+    with left:
+        area_type = st.selectbox("Property area type", options=area_types, help="Select the property area category from the training dataset.")
+        location = st.selectbox("Location", options=locations, index=None, placeholder="Search or choose a location", help="Only locations present in the cleaned dataset are listed.")
+        bhk = st.select_slider("Number of bedrooms (BHK)", options=list(range(1, 11)), value=2, help="Choose the number of bedrooms.")
+    with right:
+        total_sqft = st.number_input("Total area (square feet)", min_value=300, max_value=20000, value=650, step=50, help="Enter the total built-up area in square feet.")
+        bath = st.select_slider("Number of bathrooms", options=list(range(1, 11)), value=1)
+        balcony = st.select_slider("Number of balconies", options=list(range(0, 6)), value=1)
+    submitted = st.form_submit_button("✨  Estimate property price", use_container_width=True)
 
-# --------------------------------------------------
-# PREDICTION FORM
-# --------------------------------------------------
-st.markdown(
-    '<div class="section-heading">Configure your property</div>'
-    '<div class="section-subtitle">'
-    'Enter the details below to estimate the property price.'
-    '</div>',
-    unsafe_allow_html=True,
-)
-
-with st.form("property_prediction_form"):
-    first_col, second_col = st.columns(2, gap="large")
-
-    with first_col:
-        area_type = st.selectbox(
-            "Property area type",
-            options=area_types,
-            help="Choose the area type used in the training dataset.",
-        )
-
-        location = st.selectbox(
-            "Location",
-            options=locations,
-            index=None,
-            placeholder="Search or choose a location",
-            help="Choose a location from the cleaned dataset.",
-        )
-
-        bhk = st.selectbox(
-            "Number of bedrooms (BHK)",
-            options=list(range(1, 11)),
-            index=1,
-        )
-
-    with second_col:
-        total_sqft = st.number_input(
-            "Total area (square feet)",
-            min_value=100,
-            max_value=30000,
-            value=1200,
-            step=50,
-        )
-
-        bath = st.selectbox(
-            "Number of bathrooms",
-            options=list(range(1, 13)),
-            index=1,
-        )
-
-        balcony = st.selectbox(
-            "Number of balconies",
-            options=list(range(0, 5)),
-            index=1,
-        )
-
-    submitted = st.form_submit_button(
-        "✨  Predict Property Price",
-        use_container_width=True,
-    )
-
-
-# --------------------------------------------------
-# PREDICTION RESULT
-# --------------------------------------------------
 if submitted:
-    if location is None:
+    if not location:
         st.warning("Please choose a location before predicting the price.")
     else:
-        input_data = pd.DataFrame(
-            [
-                {
-                    "area_type": area_type,
-                    "location": location,
-                    "BHK": bhk,
-                    "total_sqft": total_sqft,
-                    "bath": bath,
-                    "balcony": balcony,
-                }
-            ]
-        )
-
+        input_data = pd.DataFrame([{
+            "area_type": area_type,
+            "location": location,
+            "BHK": int(bhk),
+            "total_sqft": float(total_sqft),
+            "bath": int(bath),
+            "balcony": int(balcony),
+        }])
         try:
-            with st.spinner("Analyzing your property details..."):
+            with st.spinner("Analyzing your property details…"):
                 prediction = float(model.predict(input_data)[0])
-
             if not pd.notna(prediction):
-                st.error("The model returned an invalid prediction.")
+                st.error("The model returned an invalid estimate. Please try again.")
             elif prediction <= 0:
-                st.warning(
-                    "The model returned a non-positive price estimate. "
-                    "Try different property details."
-                )
+                st.warning("The model returned a non-positive estimate. Try adjusting the property details.")
             else:
-                st.markdown(
-                    f"""
-                    <div class="result-card">
-                        <div class="result-label">
-                            ✦ Estimated property price
-                        </div>
-                        <div class="result-price">
-                            ₹ {prediction:,.2f} Lakhs
-                        </div>
-                        <div class="result-crore">
-                            Approximately ₹ {prediction / 100:,.2f} Crore
-                        </div>
-                        <div class="result-note">
-                            📍 {location} &nbsp; • &nbsp; {bhk} BHK
-                            &nbsp; • &nbsp; {total_sqft:,} sq. ft.<br>
-                            This is a machine-learning estimate, not an
-                            official property valuation.
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                st.markdown(
-                    '<div class="section-heading">Your property summary</div>',
-                    unsafe_allow_html=True,
-                )
-
-                metric1, metric2, metric3 = st.columns(3)
-
-                metric1.metric("Bedrooms", f"{bhk} BHK")
-                metric2.metric("Property area", f"{total_sqft:,} sq. ft.")
-                metric3.metric("Bathrooms", str(bath))
-
+                safe_location = html.escape(location)
+                html_block(f"""
+                <div class="result-card">
+                  <div class="result-label">✦ ESTIMATED PROPERTY PRICE</div>
+                  <div class="result-price">₹ {prediction:,.2f} Lakhs</div>
+                  <div class="result-crore">Approximately ₹ {prediction / 100:,.2f} Crore</div>
+                  <div class="result-note">📍 {safe_location} &nbsp; • &nbsp; {int(bhk)} BHK &nbsp; • &nbsp; {int(total_sqft):,} sq. ft.<br>This is a machine-learning estimate, not an official property valuation.</div>
+                </div>
+                """)
+                st.write("")
+                st.subheader("Your property summary")
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric("Bedrooms", f"{int(bhk)} BHK")
+                m2.metric("Property area", f"{int(total_sqft):,} sq. ft.")
+                m3.metric("Bathrooms", str(int(bath)))
+                m4.metric("Balconies", str(int(balcony)))
                 if prediction > 430:
-                    st.info(
-                        "This estimate is above ₹430 lakhs. Your model was "
-                        "trained after filtering out properties above this "
-                        "price threshold, so this prediction may be less "
-                        "reliable."
-                    )
+                    st.info("This estimate is above ₹430 lakhs. If your training data excluded properties above this price, the estimate may be less reliable at this level.")
+                st.caption(f"Model detected from saved estimator: {model_label} · Output: price in lakhs · Estimates depend on training data coverage.")
+        except Exception as exc:
+            st.error("Prediction failed. Check that the saved model was trained with the same six input features and column names.")
+            st.exception(exc)
 
-                st.caption(
-                    "Model: Linear Regression | "
-                    "Output: price in lakhs | "
-                    "Results depend on the quality and coverage of the dataset."
-                )
+# ------------------------------------------------------------
+# DATASET SNAPSHOT / FOOTER
+# ------------------------------------------------------------
+st.write("")
+with st.expander("About the dataset used by this app"):
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Cleaned records", f"{len(data):,}")
+    c2.metric("Available locations", f"{len(locations):,}")
+    c3.metric("Area types", f"{len(area_types):,}")
+    st.caption("These counts are read directly from data/cleaned_bengaluru_house_data.csv. Model performance depends on the training process and data quality.")
 
-        except Exception as error:
-            st.error(f"Prediction failed: {error}")
-
-
-# --------------------------------------------------
-# FOOTER
-# --------------------------------------------------
-st.markdown(
-    """
-    <div class="footer">
-        BENGALURU HOMES · HOUSE PRICE PREDICTION<br>
-        Built with Python, Pandas, Scikit-learn and Streamlit<br>
-        For educational purposes only · Not financial or valuation advice
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+html_block("""
+<div class="footer">
+  BENGALURU HOMES · HOUSE PRICE PREDICTION<br>
+  Built with Python, Pandas, Joblib and Streamlit<br>
+  For educational purposes only · Not financial or official valuation advice
+</div>
+""")
