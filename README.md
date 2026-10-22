@@ -1,141 +1,232 @@
-# Bengaluru House Price Prediction
+# 🏡 Bengaluru House Price Prediction
 
-A machine learning project that predicts residential property prices in Bengaluru using **Python, XGBoost, Scikit-learn, and Streamlit**.
+### An End-to-End Machine Learning Project
 
-## 🚀 Live Demo
+Predict residential property prices in Bengaluru using **XGBoost, Python, Scikit-learn, and Streamlit**. Explore property details, select a location, and get an estimated price through an interactive web application.
 
-**Try the deployed application:** [Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
+<p align="center">
+  <a href="https://house-price-prediction-seemz.streamlit.app/">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Try_the_App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo">
+  </a>
+  <a href="https://github.com/Seema2908/Bangalore-House-Price-Prediction">
+    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+  </a>
+</p>
 
-Explore the application by selecting a Bengaluru location, entering property details, and viewing the estimated house price in lakhs and crores.
+---
 
-## Project Highlights
+## 📌 Project Overview
 
-- Started with the Bengaluru housing dataset containing approximately **13,320 records and 9 columns**.
-- Cleaned and filtered the data to **6,155 property records** with **6 input features** and the target `price_in_lakhs`.
-- Applied data-quality checks and removed invalid/outlier records, including properties priced above **₹430 lakhs**.
-- Evaluated Linear Regression, Ridge Regression, Random Forest, and XGBoost using the same preprocessing pipeline and train-test split.
-- Selected **XGBoost Regressor** as the final model based on its test-set performance.
-- Achieved an **R² score of 0.9196** on the held-out test set.
-- Built and deployed an interactive Streamlit application for estimating property prices in lakhs and crores.
+This project uses historical Bengaluru housing data to build a regression model that estimates residential property prices from selected property characteristics.
 
-## Tech Stack
+| Project Detail | Description |
+|---|---|
+| **Project Type** | Machine Learning — Regression |
+| **Dataset** | Bengaluru housing dataset |
+| **Final Dataset** | 6,155 property records |
+| **Selected Model** | XGBoost Regressor |
+| **Web Framework** | Streamlit |
+| **Target Variable** | `price_in_lakhs` |
 
-Python | Pandas | NumPy | Matplotlib | Scikit-learn | XGBoost | Streamlit | Jupyter Notebook | Git | GitHub
+## 📊 Model Performance
 
-## Project Workflow
+The XGBoost model was evaluated on a held-out test set containing **1,231 records**.
 
-### 1. Data Cleaning and Preprocessing
-
-- Removed unnecessary columns and handled missing or invalid property records.
-- Converted square-footage ranges into numeric values where needed.
-- Renamed relevant columns to `BHK` and `price_in_lakhs`.
-- Cleaned location values and removed invalid/outlier records.
-- Applied the project's selected filtering rules, including the ₹430-lakh upper price cutoff.
-- Prepared a final dataset with **6,155 rows and 7 columns**: six input features and one target variable.
-
-### 2. Exploratory Data Analysis (EDA)
-
-- Examined price and square-footage distributions.
-- Analyzed BHK and other property characteristics.
-- Investigated location-wise price variation.
-- Checked missing values, invalid records, and outliers.
-
-### 3. Price Filtering
-
-- Applied a cutoff of **₹430 lakhs** to restrict the target price range used by the final model.
-- Excluded records above the cutoff from the final modeling dataset.
-- Used the resulting **6,155-record dataset** for the final training notebook and Streamlit application.
-
-### 4. Model Development
-
-- Compared **Linear Regression**, **Ridge Regression**, **Random Forest**, and **XGBoost**.
-- Selected **XGBoost Regressor** as the final model.
-- Used `OneHotEncoder(handle_unknown="ignore")` for the categorical features `area_type` and `location`.
-- Applied median imputation and `StandardScaler` to numerical features in a Scikit-learn preprocessing pipeline.
-- Combined preprocessing and the estimator in a pipeline so the same transformations are applied during training and prediction.
-- Saved the final XGBoost pipeline to `models/house_price_model.pkl` using Joblib.
-
-**Input features:** `area_type`, `location`, `BHK`, `total_sqft`, `bath`, `balcony`  
-**Target variable:** `price_in_lakhs`
-
-### 5. Model Evaluation
-
-The notebook uses an **80:20 train-test split** with `random_state=42` on the final dataset of 6,155 records: **4,924 training records** and **1,231 held-out test records**.
-
-The reported metrics for the selected XGBoost model are:
-
-| Metric | Result |
-|---|---:|
-| Mean Absolute Error (MAE) | ₹11.1315 lakhs |
-| Root Mean Squared Error (RMSE) | ₹17.5409 lakhs |
-| R² Score | 0.9196 |
-
-The notebook's model comparison reported the following results on the same split:
+<p align="center">
+  <img src="https://img.shields.io/badge/R²_Score-91.96%25-2E8B57?style=for-the-badge" alt="R2 Score">
+  <img src="https://img.shields.io/badge/MAE-₹11.13_Lakhs-2563EB?style=for-the-badge" alt="MAE">
+  <img src="https://img.shields.io/badge/RMSE-₹17.54_Lakhs-7C3AED?style=for-the-badge" alt="RMSE">
+</p>
 
 | Model | MAE (lakhs) | RMSE (lakhs) | R² Score |
 |---|---:|---:|---:|
-| **XGBoost** | **11.1315** | **17.5409** | **0.9196** |
+| 🏆 **XGBoost** | **11.1315** | **17.5409** | **0.9196** |
 | Linear Regression | 12.5766 | 19.6946 | 0.8987 |
 | Ridge Regression | 12.6084 | 19.7433 | 0.8981 |
 | Random Forest | 11.6195 | 20.2393 | 0.8930 |
 
-MAE and RMSE are expressed in lakhs. Lower error values are better, while a higher R² score indicates that the model explains more of the variation in the target values. These metrics describe the evaluated split, not a guarantee of accuracy for every property.
+**Evaluation setup:** 80:20 train-test split with `random_state=42` — 4,924 training records and 1,231 test records.
 
-### 6. Streamlit Application
+> **Note:** These results represent performance on one test split. They do not guarantee the same accuracy for every property or real-world market price.
 
-**Live application:** [Open Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
+## ✨ Key Features
 
-- Provides an interactive interface for selecting a property area type and Bengaluru location.
-- Accepts BHK, total square footage, bathroom count, and balcony count.
-- Loads the saved XGBoost pipeline and cleaned dataset.
-- Displays the predicted price in lakhs and an approximate value in crores.
-- Includes a property summary and information about the dataset.
-- Deployed using Streamlit Community Cloud.
+- 🏠 **Price Prediction:** Estimate property prices in lakhs and crores.
+- 📍 **Location Selection:** Choose from locations available in the cleaned dataset.
+- 📐 **Property Details:** Enter area type, BHK, square footage, bathrooms, and balconies.
+- 🤖 **XGBoost Model:** Use the selected regression model for predictions.
+- 🔄 **Consistent Preprocessing:** Apply the saved preprocessing and model pipeline to incoming inputs.
+- 🌐 **Live Web App:** Access the application through Streamlit Community Cloud.
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|---|---|
+| Programming | Python |
+| Data Analysis | Pandas, NumPy |
+| Visualization | Matplotlib |
+| Machine Learning | XGBoost, Scikit-learn |
+| Preprocessing | OneHotEncoder, SimpleImputer, StandardScaler |
+| Model Saving | Joblib |
+| Web Application | Streamlit |
+| Development | Jupyter Notebook, VS Code |
+| Version Control | Git, GitHub |
+
+## 🔍 Project Workflow
+
+### 1. Data Cleaning and Preprocessing
+
+- Started with approximately **13,320 records and 9 columns**.
+- Removed unnecessary columns and handled missing or invalid property records.
+- Converted square-footage ranges into numeric values where required.
+- Cleaned location values and renamed relevant columns.
+- Applied the selected data-filtering rules, including the ₹430-lakh upper price cutoff.
+- Prepared a final dataset containing **6,155 rows and 7 columns**.
+
+### 2. Exploratory Data Analysis (EDA)
+
+Investigated the dataset to understand property characteristics and price patterns.
+
+- Price and square-footage distributions
+- BHK and property characteristics
+- Location-wise price variation
+- Missing values, invalid entries, and outliers
+
+### 3. Price Filtering
+
+Applied the project's selected filtering rules to restrict the modeling dataset to properties priced at or below **₹430 lakhs**. The resulting 6,155 records were used for the final model training and evaluation.
+
+### 4. Model Development
+
+Evaluated four regression algorithms using the same train-test split and preprocessing approach:
+
+- Linear Regression
+- Ridge Regression
+- Random Forest
+- **XGBoost Regressor — selected model**
+
+The preprocessing pipeline includes:
+
+- `OneHotEncoder(handle_unknown="ignore")` for `area_type` and `location`
+- Median imputation and `StandardScaler` for numerical features
+- A combined Scikit-learn pipeline to apply consistent transformations during training and prediction
+
+The trained pipeline was saved using Joblib as `models/house_price_model.pkl`.
+
+### 5. Model Evaluation
+
+Used an **80:20 train-test split** with `random_state=42`.
+
+| Dataset | Records |
+|---|---:|
+| Training set | 4,924 |
+| Test set | 1,231 |
+| **Total** | **6,155** |
+
+The final XGBoost model achieved an R² score of **0.9196**, with an MAE of **₹11.1315 lakhs** and an RMSE of **₹17.5409 lakhs** on the held-out test set.
+
+### 6. Streamlit Deployment
+
+The trained model is integrated into an interactive web application.
+
+**[🚀 Open the Live Bengaluru House Price Prediction App](https://house-price-prediction-seemz.streamlit.app/)**
+
+Users can select a location and area type, enter property details, and view the predicted price. The app loads the saved XGBoost pipeline and cleaned dataset.
+
+---
+
+## 🧾 Input Features
+
+| Feature | Description |
+|---|---|
+| `area_type` | Type of property area |
+| `location` | Bengaluru property location |
+| `BHK` | Number of bedrooms, hall, and kitchen |
+| `total_sqft` | Total property area in square feet |
+| `bath` | Number of bathrooms |
+| `balcony` | Number of balconies |
+| `price_in_lakhs` | **Target variable** — property price in lakhs |
+
+## 📁 Project Structure
 
 ```text
 Bangalore-House-Price-Prediction/
+│
 ├── data/
 │   └── cleaned_bengaluru_house_data.csv
+│
 ├── notebooks/
 │   ├── eda.ipynb
 │   └── model_training.ipynb
+│
 ├── models/
 │   └── house_price_model.pkl
+│
 ├── app.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Installation and Usage
+## ⚙️ Run the Project Locally
 
-Clone the repository and run the application locally:
+### Prerequisites
+
+- Python installed
+- Git installed
+
+### Installation
+
+**1. Clone the repository**
 
 ```bash
 git clone https://github.com/Seema2908/Bangalore-House-Price-Prediction.git
+```
+
+**2. Navigate to the project directory**
+
+```bash
 cd Bangalore-House-Price-Prediction
+```
+
+**3. Install the required dependencies**
+
+```bash
 pip install -r requirements.txt
+```
+
+**4. Run the Streamlit application**
+
+```bash
 streamlit run app.py
 ```
 
-Make sure the cleaned dataset and saved model are present at the paths shown in the project structure.
+Open the local URL displayed in your terminal. Ensure the cleaned dataset and saved model exist at the paths specified in the project.
 
-## Limitations
+## ⚠️ Limitations
 
-- The model is trained on a filtered dataset with prices at or below ₹430 lakhs; estimates outside this range may be less reliable.
-- Predictions depend on the coverage and quality of the historical dataset and the selected input features.
-- The reported metrics come from one held-out test split and may differ on other data.
-- The model does not account for every factor that can affect market price, such as exact building condition, age, amenities, legal status, or real-time market changes.
+- The model is trained on a filtered dataset with prices at or below ₹430 lakhs; predictions outside this range may be less reliable.
+- Predictions depend on the quality and coverage of the historical dataset.
+- The evaluation metrics are based on one held-out test split.
+- The model does not account for every factor that affects property prices, such as building condition, property age, amenities, legal status, or real-time market changes.
 
-## Disclaimer
+## 📌 Disclaimer
 
-This project is for educational purposes only. Predicted prices are estimates and should not be treated as guaranteed market values or official property valuations.
+This project is intended for educational purposes. Predicted prices are estimates and should not be treated as guaranteed market values or official property valuations.
 
-## Author
+---
 
-**Seema Timmanagoudar**
+## 👩‍💻 Author
 
-- GitHub: [Seema2908](https://github.com/Seema2908)
-- Project Repository: [Bangalore House Price Prediction](https://github.com/Seema2908/Bangalore-House-Price-Prediction)
-- Live Demo: [Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
+### Seema Timmanagoudar
+
+🔗 **GitHub:** [Seema2908](https://github.com/Seema2908)
+
+💻 **Project Repository:** [Bengaluru House Price Prediction](https://github.com/Seema2908/Bangalore-House-Price-Prediction)
+
+🌐 **Live Application:** [Try the Prediction App](https://house-price-prediction-seemz.streamlit.app/)
+
+---
+
+<p align="center">
+  <b>If you find this project interesting, consider giving the repository a ⭐ on GitHub!</b>
+</p>
