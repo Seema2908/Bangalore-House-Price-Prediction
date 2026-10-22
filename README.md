@@ -2,6 +2,12 @@
 
 A machine learning project that predicts residential property prices in Bengaluru using **Python, XGBoost, Scikit-learn, and Streamlit**.
 
+## 🚀 Live Demo
+
+**Try the deployed application:** [Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
+
+Explore the application by selecting a Bengaluru location, entering property details, and viewing the estimated house price in lakhs and crores.
+
 ## Project Highlights
 
 - Started with the Bengaluru housing dataset containing approximately **13,320 records and 9 columns**.
@@ -10,7 +16,7 @@ A machine learning project that predicts residential property prices in Bengalur
 - Evaluated Linear Regression, Ridge Regression, Random Forest, and XGBoost using the same preprocessing pipeline and train-test split.
 - Selected **XGBoost Regressor** as the final model based on its test-set performance.
 - Achieved an **R² score of 0.9196** on the held-out test set.
-- Built an interactive Streamlit application for estimating property prices in lakhs and crores.
+- Built and deployed an interactive Streamlit application for estimating property prices in lakhs and crores.
 
 ## Tech Stack
 
@@ -77,11 +83,14 @@ MAE and RMSE are expressed in lakhs. Lower error values are better, while a high
 
 ### 6. Streamlit Application
 
+**Live application:** [Open Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
+
 - Provides an interactive interface for selecting a property area type and Bengaluru location.
 - Accepts BHK, total square footage, bathroom count, and balcony count.
 - Loads the saved XGBoost pipeline and cleaned dataset.
 - Displays the predicted price in lakhs and an approximate value in crores.
 - Includes a property summary and information about the dataset.
+- Deployed using Streamlit Community Cloud.
 
 ## Project Structure
 
@@ -101,14 +110,16 @@ Bangalore-House-Price-Prediction/
 
 ## Installation and Usage
 
+Clone the repository and run the application locally:
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/Bangalore-House-Price-Prediction.git
+git clone https://github.com/Seema2908/Bangalore-House-Price-Prediction.git
 cd Bangalore-House-Price-Prediction
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Replace `YOUR_USERNAME` with your GitHub username. Make sure the cleaned dataset and saved model are present at the paths shown in the project structure.
+Make sure the cleaned dataset and saved model are present at the paths shown in the project structure.
 
 ## Limitations
 
@@ -120,3 +131,11 @@ Replace `YOUR_USERNAME` with your GitHub username. Make sure the cleaned dataset
 ## Disclaimer
 
 This project is for educational purposes only. Predicted prices are estimates and should not be treated as guaranteed market values or official property valuations.
+
+## Author
+
+**Seema Timmanagoudar**
+
+- GitHub: [Seema2908](https://github.com/Seema2908)
+- Project Repository: [Bangalore House Price Prediction](https://github.com/Seema2908/Bangalore-House-Price-Prediction)
+- Live Demo: [Bengaluru House Price Prediction](https://house-price-prediction-seemz.streamlit.app/)
