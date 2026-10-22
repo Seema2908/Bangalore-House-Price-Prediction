@@ -87,15 +87,8 @@ st.markdown(dedent("""
 :root { color-scheme: dark; --bg:#080d1b; --panel:#111a2e; --line:rgba(148,171,220,.18); --text:#f1f5ff; --muted:#a7b4ce; --blue:#65a7ff; --purple:#a78bfa; }
 html, body, [class*="css"] { font-family:'DM Sans',sans-serif; }
 .stApp { color:var(--text); background:radial-gradient(ellipse at 8% 0%,rgba(58,104,210,.22),transparent 35%),radial-gradient(ellipse at 92% 20%,rgba(139,92,246,.17),transparent 32%),linear-gradient(135deg,#080d1b 0%,#0b1224 55%,#0c1020 100%); }
-[data-testid="stHeader"] {
-    background:transparent !important;
-    box-shadow:none !important;
-}
-[data-testid="stToolbar"] { background:transparent !important; }
-section[data-testid="stMain"] > div.block-container {
-    padding-top:0.75rem !important;
-}
-.block-container { max-width:1220px; padding-top:0.75rem; padding-bottom:3.5rem; }
+[data-testid="stHeader"] { background:rgba(8,13,27,.72); }
+.block-container { max-width:1220px; padding-top:2rem; padding-bottom:3.5rem; }
 #MainMenu, footer { visibility:hidden; }
 h1,h2,h3 { font-family:'Manrope',sans-serif !important; color:var(--text) !important; }
 p, label, [data-testid="stCaptionContainer"] { color:var(--muted); }
@@ -157,7 +150,7 @@ html_block("""
   <div class="eyebrow">✦ SMART REAL ESTATE ESTIMATOR</div>
   <h1>Find your next home<br>in <span class="gradient">Bengaluru.</span></h1>
   <div class="hero-copy">Discover an estimated property price using machine learning. Choose your location, configure your property details, and get a personalized estimate in seconds.</div>
-  <div class="hero-tag">🤖 Machine Learning &nbsp; • &nbsp; 📍 Bengaluru, India &nbsp; • &nbsp; ⚡ Instant Estimate</div>
+  <div class="hero-tag">🤖 XGBoost Regressor &nbsp; • &nbsp; 📍 Bengaluru, India &nbsp; • &nbsp; ⚡ Instant Estimate</div>
 </div>
 """)
 
@@ -165,7 +158,7 @@ st.write("")
 feature_cols = st.columns(3, gap="medium")
 features = [
     ("📍", "Location-aware", "Choose from locations available in the cleaned Bengaluru housing dataset."),
-    ("🧠", "ML-powered", "Your saved, trained model generates an estimate from the property details you provide."),
+    ("🧠", "XGBoost-powered", "House prices are estimated using trained XGBoost regression pipeline."),
     ("⚡", "Instant estimate", "Submit the form to see an estimated price in lakhs and crores."),
 ]
 for col, (icon, title, description) in zip(feature_cols, features):
@@ -257,7 +250,7 @@ if submitted:
                 m4.metric("Balconies", str(int(balcony)))
                 if prediction > 430:
                     st.info("This estimate is above ₹430 lakhs. If your training data excluded properties above this price, the estimate may be less reliable at this level.")
-                st.caption(f"Model detected from saved estimator: {model_label} · Output: price in lakhs · Estimates depend on training data coverage.")
+                st.caption(f"Prediction model: XGBoost Regressor ({model_label}) · Output: price in lakhs · Estimates depend on training data coverage.")
         except Exception as exc:
             st.error("Prediction failed. Check that the saved model was trained with the same six input features and column names.")
             st.exception(exc)
